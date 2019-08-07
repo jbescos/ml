@@ -7,7 +7,7 @@ public class Neuron implements INeuron {
 	private double bias;
 	private double[] inputWeights;
 	private INeuron[] inputNeurons;
-	private String label;
+	private String label = "";
 	
 	public Neuron() {
 	}
@@ -64,13 +64,6 @@ public class Neuron implements INeuron {
 	@Override
 	public String toString() {
 		return "["+label+" = "+value+"]";
-	}
-	@Override
-	public void trainPaths(double weightToIncrement) {
-		for(int i=0;i<inputNeurons.length;i++) {
-			INeuron inputNeuron = inputNeurons[i];
-			inputWeights[i] = inputWeights[i] + inputNeuron.getValue() + weightToIncrement;
-		}
 	}
 	
 }

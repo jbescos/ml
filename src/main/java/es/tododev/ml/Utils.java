@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
-import java.util.zip.ZipEntry;
+import java.util.Random;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.csv.CSVFormat;
@@ -57,6 +57,11 @@ public class Utils {
 			normalized[i] = rawData[i] / max;
 		}
 		return normalized;
+	}
+	
+	public static double getRandom(double rangeMin, double rangeMax) {
+		Random r = new Random();
+		return rangeMin + (rangeMax - rangeMin) * r.nextDouble();
 	}
 
 }

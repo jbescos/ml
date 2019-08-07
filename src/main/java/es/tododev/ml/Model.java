@@ -1,13 +1,16 @@
 package es.tododev.ml;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 
 public class Model implements IModel {
 	
 	private static final long serialVersionUID = 1L;
 	private final List<INeuron[]> layers = new ArrayList<>();
+	private static final int ELEMENTS_TO_CALCULATE_COST = 100;
 	
 	private void addLayer(INeuron[] neurons) {
 		if(!layers.isEmpty()) {
@@ -38,29 +41,50 @@ public class Model implements IModel {
 
 	@Override
 	public void train(int iterations, List<Data> trainingData) {
+		setRandomWeights();
 		for(int i=0;i<iterations;i++) {
-			for(Data data : trainingData) {
-				computeData(data);
-			}
+			Collections.shuffle(trainingData);
+			double cost = obtainCost(trainingData);
+			System.out.println("Cost "+cost);
+			// TODO calculate the gradient and adjust weight and bias
+//			for(List<Data> data : Lists.partition(trainingData, ELEMENTS_TO_CALCULATE_COST)) {
+//				
+//			}
 		}
 		
 		
 	}
 	
-	private void computeData(Data data) {
-		INeuron[] inputLayer = layers.get(0);
-		INeuron[] outputLayer = layers.get(layers.size()-1);
-		double[] normalizedInput = Utils.normalize(data.getInputValues());
-		for(int i=0;i<inputLayer.length;i++) {
-			inputLayer[i].setValue(normalizedInput[i]);
-		}
-		for(INeuron outNeuron : outputLayer) {
-			if(data.getExpectedLabel().equals(outNeuron.getLabel())) {
-				outNeuron.trainPaths(1);
-			}else {
-				outNeuron.trainPaths(-1);
+	private void setRandomWeights() {
+		for(int i=1;i<layers.size();i++) {
+			INeuron[] neurons = layers.get(i);
+			for(int j=0;j<neurons.length;j++) {
+				INeuron neuron = neurons[j];
+				for(int w=0;w<neuron.getInputWeights().length;w++) {
+					neuron.getInputWeights()[w] = Utils.getRandom(-1, 1);
+				}
 			}
 		}
+	}
+	
+	private double obtainCost(List<Data> datas) {
+		int total = datas.size();
+		double totalCost = 0;
+		for(Data data : datas) {
+			INeuron[] outputLayer = getResult(data.getInputValues());
+			totalCost = calculateCost(data.getExpectedLabel(), outputLayer) + totalCost;
+		}
+		totalCost = totalCost / total;
+		return totalCost;
+	}
+	
+	double calculateCost(String expectedLabel, INeuron[] outputLayer) {
+		double total = 0;
+		for(INeuron neuron : outputLayer) {
+			double diff = neuron.getValue() - (expectedLabel.equals(neuron.getLabel()) ? 1 : 0);
+			total = Math.pow(diff, 2) + total;
+		}
+		return total / outputLayer.length;
 	}
 
 	@Override
@@ -94,5 +118,27 @@ public class Model implements IModel {
 		}
 		return winner.getLabel();
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		for(int i=1;i<layers.size();i++) {
+			builder.append("Layer ").append(i).append("\n");
+			INeuron[] neurons = layers.get(i);
+			for(int j=0;j<neurons.length;j++) {
+				INeuron neuron = neurons[j];
+				builder.append("Neuron ").append(j).append(" ").append(neuron.getLabel()).append(" = ").append(neuron.getValue());
+				builder.append(" [ ");
+				for(int w=0;w<neuron.getInputWeights().length;w++) {
+					builder.append(neuron.getInputWeights()[w]).append(" ");
+				}
+				builder.append("]");
+				builder.append("\n");
+			}
+		}
+		
+		return builder.toString();
+	}
+	
 	
 }

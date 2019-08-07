@@ -15,6 +15,5 @@ public interface INeuron extends Serializable {
 	void setInputNeurons(INeuron[] inputNeurons);
 	void setLabel(String label);
 	String getLabel();
-	void trainPaths(double weightToIncrement);
 	
 }
