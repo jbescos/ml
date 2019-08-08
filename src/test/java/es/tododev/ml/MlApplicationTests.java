@@ -41,9 +41,7 @@ public class MlApplicationTests {
 		List<Data> training = Utils.getFromCSV(this.getClass().getResourceAsStream("/models/numbers/mnist_train.zip"));
 		int inputLayer = training.get(0).getInputValues().length;
 		IModel model = new Model();
-		model.addLayer(inputLayer);
-		model.addLayer(10);
-		model.addOutput("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+		model.setLayers(new int[] {inputLayer, 10, 10}, new String[] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"});
 		model.train(10, training);
 		List<Data> tests = Utils.getFromCSV(this.getClass().getResourceAsStream("/models/numbers/mnist_test.zip"));
 		int success = 0;

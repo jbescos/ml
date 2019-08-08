@@ -41,18 +41,23 @@ public class Model implements IModel {
 
 	@Override
 	public void train(int iterations, List<Data> trainingData) {
-		setRandomWeights();
-		for(int i=0;i<iterations;i++) {
-			Collections.shuffle(trainingData);
-			double cost = obtainCost(trainingData);
-			System.out.println("Cost "+cost);
-			// TODO calculate the gradient and adjust weight and bias
-//			for(List<Data> data : Lists.partition(trainingData, ELEMENTS_TO_CALCULATE_COST)) {
-//				
-//			}
+//		for(int i=0;i<iterations;i++) {
+		Collections.shuffle(trainingData);
+		for(List<Data> data : Lists.partition(trainingData, ELEMENTS_TO_CALCULATE_COST)) {
+			backPropagate(data);
 		}
+		double cost = obtainCost(trainingData);
+		System.out.println("Cost "+cost);
+//		}
 		
 		
+	}
+	
+	private void backPropagate(List<Data> datas) {
+		for(Data data : datas) {
+			INeuron[] outputLayer = getResult(data.getInputValues());
+			// TODO
+		}
 	}
 	
 	private void setRandomWeights() {
@@ -61,7 +66,7 @@ public class Model implements IModel {
 			for(int j=0;j<neurons.length;j++) {
 				INeuron neuron = neurons[j];
 				for(int w=0;w<neuron.getInputWeights().length;w++) {
-					neuron.getInputWeights()[w] = Utils.getRandom(-1, 1);
+					neuron.getInputWeights()[w] = Utils.getRandom(0, 1);
 				}
 			}
 		}
@@ -87,8 +92,7 @@ public class Model implements IModel {
 		return total / outputLayer.length;
 	}
 
-	@Override
-	public void addOutput(String ... labels) {
+	private void addOutput(String ... labels) {
 		INeuron[] layer = new INeuron[labels.length];
 		for(int i=0;i<labels.length;i++) {
 			layer[i] = new Neuron(labels[i]);
@@ -96,13 +100,21 @@ public class Model implements IModel {
 		addLayer(layer);
 	}
 
-	@Override
-	public void addLayer(int neurons) {
+	private void addLayer(int neurons) {
 		INeuron[] layer = new INeuron[neurons];
 		for(int i=0;i<neurons;i++) {
 			layer[i] = new Neuron();
 		}
 		addLayer(layer);
+	}
+	
+	@Override
+	public void setLayers(int[] layersSize, String[] outputLayer) {
+		for(int size : layersSize) {
+			addLayer(size);
+		}
+		addOutput(outputLayer);
+		setRandomWeights();
 	}
 
 	@Override
