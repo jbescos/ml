@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.logging.log4j.util.Strings;
+
 import com.google.common.collect.Lists;
 
 public class Model implements IModel {
@@ -92,18 +94,12 @@ public class Model implements IModel {
 		return total / outputLayer.length;
 	}
 
-	private void addOutput(String ... labels) {
+	private void addLayer(String[] labels) {
 		INeuron[] layer = new INeuron[labels.length];
 		for(int i=0;i<labels.length;i++) {
-			layer[i] = new Neuron(labels[i]);
-		}
-		addLayer(layer);
-	}
-
-	private void addLayer(int neurons) {
-		INeuron[] layer = new INeuron[neurons];
-		for(int i=0;i<neurons;i++) {
-			layer[i] = new Neuron();
+			String label =  labels[i];
+			layer[i] = new Neuron(label != null ? label : Strings.EMPTY);
+			
 		}
 		addLayer(layer);
 	}
@@ -111,9 +107,9 @@ public class Model implements IModel {
 	@Override
 	public void setLayers(int[] layersSize, String[] outputLayer) {
 		for(int size : layersSize) {
-			addLayer(size);
+			addLayer(new String[size]);
 		}
-		addOutput(outputLayer);
+		addLayer(outputLayer);
 		setRandomWeights();
 	}
 

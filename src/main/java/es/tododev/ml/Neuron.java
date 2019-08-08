@@ -7,7 +7,7 @@ public class Neuron implements INeuron {
 	private double bias;
 	private double[] inputWeights;
 	private INeuron[] inputNeurons;
-	private String label = "";
+	private String label;
 	
 	public Neuron() {
 	}
