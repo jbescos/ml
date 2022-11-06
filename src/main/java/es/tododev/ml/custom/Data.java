@@ -1,4 +1,4 @@
-package es.tododev.ml;
+package es.tododev.ml.custom;
 
 public class Data {
 

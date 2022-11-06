@@ -1,4 +1,4 @@
-package es.tododev.ml;
+package es.tododev.ml.custom;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,13 +7,15 @@ import java.io.IOException;
 import java.util.List;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class MlApplicationTests {
+import es.tododev.ml.custom.Data;
+import es.tododev.ml.custom.IModel;
+import es.tododev.ml.custom.INeuron;
+import es.tododev.ml.custom.Model;
+import es.tododev.ml.custom.Neuron;
+import es.tododev.ml.custom.Utils;
+
+public class MlApplicationTest {
 	
 	@Test
 	public void calculateCost() {

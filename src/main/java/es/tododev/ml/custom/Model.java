@@ -1,10 +1,8 @@
-package es.tododev.ml;
+package es.tododev.ml.custom;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.logging.log4j.util.Strings;
 
 import com.google.common.collect.Lists;
 
@@ -98,7 +96,7 @@ public class Model implements IModel {
 		INeuron[] layer = new INeuron[labels.length];
 		for(int i=0;i<labels.length;i++) {
 			String label =  labels[i];
-			layer[i] = new Neuron(label != null ? label : Strings.EMPTY);
+			layer[i] = new Neuron(label != null ? label : "");
 			
 		}
 		addLayer(layer);
