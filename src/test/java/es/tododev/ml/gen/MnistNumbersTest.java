@@ -1,7 +1,11 @@
 package es.tododev.ml.gen;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -15,10 +19,10 @@ import es.tododev.ml.gen.Trainer.TestData;
 
 public class MnistNumbersTest {
 
-    private static final int LIMIT_PLAYERS = 1000;
+    private static final int LIMIT_PLAYERS = 100;
 
     @Test
-    public void predictNumbers() throws IOException {
+    public void predictNumbers() throws IOException, ClassNotFoundException {
         List<TestData> train = fromZip("/mnist_train.zip");
         int inputs = train.get(0).getIn().length;
         int outputs = train.get(0).getOut().length;
@@ -37,6 +41,14 @@ public class MnistNumbersTest {
         train = fromZip("/mnist_test.zip");
         test = 1 - best.cost(train);
         System.out.println("Precission with test data: " + test);
+
+        // Test file load/save
+        Path file = Files.createTempFile("Net", ".ml");
+        best.save(file.toFile());
+        Net loaded = Net.load(file.toFile());
+
+        // Should be the same result
+        assertEquals(Float.toString(best.cost(train)), Float.toString(loaded.cost(train)));
     }
 
     private List<TestData> fromZip(String resource) throws IOException {

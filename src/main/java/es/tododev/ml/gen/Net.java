@@ -1,5 +1,11 @@
 package es.tododev.ml.gen;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -152,4 +158,17 @@ public class Net implements Comparable<Net>, Serializable {
         return cost.compareTo(o.cost);
     }
 
+    public void save(File file) throws IOException {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
+            out.writeObject(this);
+        }
+        System.out.println(file.getAbsolutePath() + " saved");
+    }
+    
+    public static Net load(File file) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+            System.out.println(file.getAbsolutePath() + " loaded");
+            return (Net) in.readObject();
+        }
+    }
 }
