@@ -9,19 +9,21 @@ import java.util.stream.IntStream;
 
 public class Trainer {
     
-    private int generations = 50;
+    private int generations = 10;
     private int choosen = 5;
+    private int mutationsPerNeuron = 2;
 
     public Net train(List<Net> players, List<TestData> data) {
         List<Net> results = null;
         for (int i = 0; i < generations; i++) {
+            long init = System.currentTimeMillis();
             results = IntStream.rangeClosed(0, players.size() - 1).parallel()
                     .mapToObj(j -> player(players.get(j), new ArrayList<>(data)))
                     .sorted()
                     .collect(Collectors.toList())
                     .subList(0, choosen);
             createNewGen(players, results);
-            System.out.println("Gen: " + i + " score " + results.get(0).getScore());
+            System.out.println("Generation " + i + ", Score " + (1 - results.get(0).getCost()) + ". Time " + (System.currentTimeMillis() - init) / 1000 + "s.");
         }
         return results.get(0);
     }
@@ -30,38 +32,36 @@ public class Trainer {
         int limit = players.size();
         players.clear();
         players.addAll(results);
+        Random rand = new Random();
         while (players.size() < limit) {
-            int selected = new Random().nextInt(results.size());
+            int selected = rand.nextInt(results.size());
             Net best = results.get(selected);
             Net net = best.copy();
-            net.mutate();
+            net.mutate(mutationsPerNeuron);
             players.add(net);
         }
     }
     
     private Net player(Net copy, List<TestData> data) {
         Collections.shuffle(data);
-        float score = 0;
+        float cost = 0;
         for (TestData test : data) {
-            Neuron[] out = copy.calculate(test.in);
-            score = score + score(out, test.out);
+            copy.calculate(test.in);
+            int predictedWinner = copy.result();
+            int expectedWinner = test.winnerIdx();
+            if (predictedWinner != expectedWinner) {
+                cost++;
+            }
         }
-        copy.setScore(score / data.size());
+        copy.setCost(cost / data.size());
         return copy;
-    }
-    
-    private float score(Neuron[] out, float[] expected) {
-        float error = 0;
-        for (int i = 0; i < expected.length; i++) {
-            error = error + Math.abs(out[i].getValue() - expected[i]);
-        }
-        return 1 - (error / expected.length);
     }
     
     public static class TestData {
 
         private final float[] in;
         private final float[] out;
+        private int winner = -1;
 
         public TestData(float[] in, float[] out) {
             this.in = in;
@@ -74,6 +74,18 @@ public class Trainer {
 
         public float[] getOut() {
             return out;
+        }
+        
+        public int winnerIdx() {
+            if (winner == -1) {
+                winner = 0;
+                for (int i = 1; i < out.length; i++) {
+                    if (out[i] > out[i - 1]) {
+                        winner = i;
+                    }
+                }
+            }
+            return winner;
         }
         
     }

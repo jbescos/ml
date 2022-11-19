@@ -26,8 +26,9 @@ public class TrainerTest {
         }).collect(Collectors.toList());
         Trainer trainer = new Trainer();
         Net best = trainer.train(players, generatePairEvenTestData(TEST_ITEMS));
-        System.out.println("Best score is: " + best.getScore());
-        verify(trainer, best, generatePairEvenTestData(10));
+        System.out.println("Best score is: " + ( 1 - best.getCost()));
+        float test = best.test(generatePairEvenTestData(100));
+        System.out.println("Precission: " + test);
     }
     
     @Test
@@ -41,21 +42,9 @@ public class TrainerTest {
         }).collect(Collectors.toList());
         Trainer trainer = new Trainer();
         Net best = trainer.train(players, generateHeadTailTestData(TEST_ITEMS));
-        System.out.println("Best score is: " + best.getScore());
-        verify(trainer, best, generateHeadTailTestData(100));
-    }
-    
-    private void verify(Trainer trainer, Net best, List<TestData> unkown) {
-        int accurate = 0;
-        for (TestData data : unkown) {
-            best.calculate(data.getIn());
-            int idxWinner = best.result();
-            boolean correct = data.getOut()[idxWinner] == 1;
-            if (correct) {
-                accurate++;
-            }
-        }
-        System.out.println("Precisison: " + (accurate / unkown.size()));
+        System.out.println("Best score is: " + ( 1 - best.getCost()));
+        float test = best.test(generateHeadTailTestData(100));
+        System.out.println("Precission: " + test);
     }
     
     private List<TestData> generatePairEvenTestData(int items) {

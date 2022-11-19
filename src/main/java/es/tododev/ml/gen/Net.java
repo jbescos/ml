@@ -6,11 +6,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import es.tododev.ml.gen.Trainer.TestData;
+
 public class Net implements Comparable<Net>, Serializable {
 
     private static final long serialVersionUID = 1L;
     private final List<Neuron[]> layers = new ArrayList<>();
-    private Float score = 0f;
+    private Float cost = 0f;
     
     public void addLayer(int size) {
         Neuron[] layer = new Neuron[size];
@@ -38,10 +40,10 @@ public class Net implements Comparable<Net>, Serializable {
         return layers.get(layers.size() - 1);
     }
     
-    public void mutate() {
+    public void mutate(int mutations) {
         for (int i = 1; i < layers.size(); i++) {
             for (Neuron neuron : layers.get(i)) {
-                neuron.mutate();
+                neuron.mutate(mutations);
             }
         }
     }
@@ -59,12 +61,28 @@ public class Net implements Comparable<Net>, Serializable {
         return copy;
     }
 
-    public Float getScore() {
-        return score;
+    public float test(List<TestData> test) {
+        float accurate = 0;
+        for (TestData data : test) {
+            calculate(data.getIn());
+            int idxWinner = result();
+            boolean correct = data.getOut()[idxWinner] == 1;
+            if (correct) {
+                accurate++;
+//                System.out.println("Prediction correct, expected idx is " + idxWinner);
+            } else {
+//                System.out.println("Prediction failed, expected output is " + from(data.getOut()) + " and the prediction was " + from(layers.get(layers.size() - 1)));
+            }
+        }
+        return accurate / test.size();
+    }
+    
+    public Float getCost() {
+        return cost;
     }
 
-    public void setScore(Float score) {
-        this.score = score;
+    public void setCost(Float cost) {
+        this.cost = cost;
     }
 
     public int result() {
@@ -76,6 +94,26 @@ public class Net implements Comparable<Net>, Serializable {
             }
         }
         return winnerIdx;
+    }
+    
+    public float resultValue(int idx) {
+        return layers.get(layers.size() - 1)[idx].getValue();
+    }
+    
+    private List<Float> from(float[] floats) {
+        List<Float> list = new ArrayList<>();
+        for (float f : floats) {
+            list.add(f);
+        }
+        return list;
+    }
+    
+    private List<Float> from(Neuron[] neurons) {
+        List<Float> list = new ArrayList<>();
+        for (Neuron n : neurons) {
+            list.add(n.getValue());
+        }
+        return list;
     }
     
     @Override
@@ -113,7 +151,7 @@ public class Net implements Comparable<Net>, Serializable {
 
     @Override
     public int compareTo(Net o) {
-        return o.score.compareTo(score);
+        return cost.compareTo(o.cost);
     }
     
 }

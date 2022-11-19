@@ -9,6 +9,7 @@ public class Neuron implements Serializable {
 
     private static final long serialVersionUID = 1L;
     public static final Neuron[] EMPTY = new Neuron[0];
+    private final Random r = new Random();
     private float[] inputWeights;
     private Neuron[] inputNeurons;
     private float bias;
@@ -28,7 +29,6 @@ public class Neuron implements Serializable {
     }
 
     private float getRandom(double rangeMin, double rangeMax) {
-        Random r = new Random();
         return (float) (rangeMin + (rangeMax - rangeMin) * r.nextDouble());
     }
     
@@ -53,12 +53,15 @@ public class Neuron implements Serializable {
         return x < 0 ? 0 : 1;
     }
     
-    public void mutate() {
-        int rand = new Random().nextInt(inputWeights.length + 1);
-        if (rand == inputWeights.length) {
-            bias = getRandom();
-        } else {
-            inputWeights[rand] = getRandom();
+    public void mutate(int mutations) {
+        for (int i = 0; i < mutations; i++) {
+            boolean mutateBias = r.nextBoolean();
+            if (mutateBias) {
+                bias = getRandom();
+            } else {
+                int rand = r.nextInt(inputWeights.length);
+                inputWeights[rand] = getRandom();
+            }
         }
     }
 
