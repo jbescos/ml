@@ -13,7 +13,8 @@ public class Net implements Comparable<Net>, Serializable {
     private static final long serialVersionUID = 1L;
     private final List<Neuron[]> layers = new ArrayList<>();
     private Float cost = 0f;
-    
+    private int[] mistakes;
+
     public void addLayer(int size) {
         Neuron[] layer = new Neuron[size];
         Neuron[] previous = layers.isEmpty() ? Neuron.EMPTY : layers.get(layers.size() - 1);
@@ -22,8 +23,8 @@ public class Net implements Comparable<Net>, Serializable {
         }
         layers.add(layer);
     }
-    
-    public Neuron[] calculate(float ... input) {
+
+    public Neuron[] calculate(float... input) {
         Neuron[] inputLayer = layers.get(0);
         if (input.length != inputLayer.length) {
             throw new IllegalArgumentException("Input length must be " + inputLayer.length);
@@ -39,17 +40,27 @@ public class Net implements Comparable<Net>, Serializable {
         }
         return layers.get(layers.size() - 1);
     }
-    
-    public void mutate(int mutations) {
-        for (int i = 1; i < layers.size(); i++) {
-            for (Neuron neuron : layers.get(i)) {
-                neuron.mutate(mutations);
+
+    public void mutate() {
+        // Back propagating
+        for (int i = 0; i < mistakes.length; i++) {
+            if (mistakes[i] > 0) {
+                int mostWrongIdx = i;
+                int currentLayer = layers.size() - 1;
+                while (currentLayer > 0 && mostWrongIdx > -1) {
+                    Neuron[] layer = layers.get(currentLayer);
+                    Neuron mostWrongNeuron = layer[mostWrongIdx];
+                    mostWrongIdx = mostWrongNeuron.mutate();
+                    currentLayer--;
+                }
             }
         }
     }
-    
+
     public Net copy() {
         Net copy = new Net();
+        copy.mistakes = new int[mistakes.length];
+        System.arraycopy(mistakes, 0, copy.mistakes, 0, mistakes.length);
         for (Neuron[] layer : layers) {
             Neuron[] previous = copy.layers.isEmpty() ? Neuron.EMPTY : copy.layers.get(copy.layers.size() - 1);
             copy.addLayer(layer.length);
@@ -61,22 +72,25 @@ public class Net implements Comparable<Net>, Serializable {
         return copy;
     }
 
-    public float test(List<TestData> test) {
-        float accurate = 0;
+    public float cost(List<TestData> test) {
+        mistakes = new int[test.get(0).getOut().length];
+        float cost = 0;
         for (TestData data : test) {
             calculate(data.getIn());
             int idxWinner = result();
             boolean correct = data.getOut()[idxWinner] == 1;
-            if (correct) {
-                accurate++;
+            if (!correct) {
+                mistakes[idxWinner] = mistakes[idxWinner] + 1;
+                cost++;
 //                System.out.println("Prediction correct, expected idx is " + idxWinner);
             } else {
 //                System.out.println("Prediction failed, expected output is " + from(data.getOut()) + " and the prediction was " + from(layers.get(layers.size() - 1)));
             }
         }
-        return accurate / test.size();
+        this.cost = cost / test.size();
+        return this.cost;
     }
-    
+
     public Float getCost() {
         return cost;
     }
@@ -95,27 +109,11 @@ public class Net implements Comparable<Net>, Serializable {
         }
         return winnerIdx;
     }
-    
+
     public float resultValue(int idx) {
         return layers.get(layers.size() - 1)[idx].getValue();
     }
-    
-    private List<Float> from(float[] floats) {
-        List<Float> list = new ArrayList<>();
-        for (float f : floats) {
-            list.add(f);
-        }
-        return list;
-    }
-    
-    private List<Float> from(Neuron[] neurons) {
-        List<Float> list = new ArrayList<>();
-        for (Neuron n : neurons) {
-            list.add(n.getValue());
-        }
-        return list;
-    }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(layers);
@@ -153,5 +151,5 @@ public class Net implements Comparable<Net>, Serializable {
     public int compareTo(Net o) {
         return cost.compareTo(o.cost);
     }
-    
+
 }

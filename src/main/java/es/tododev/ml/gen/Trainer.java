@@ -11,14 +11,13 @@ public class Trainer {
     
     private int generations = 10;
     private int choosen = 5;
-    private int mutationsPerNeuron = 2;
 
     public Net train(List<Net> players, List<TestData> data) {
         List<Net> results = null;
         for (int i = 0; i < generations; i++) {
             long init = System.currentTimeMillis();
             results = IntStream.rangeClosed(0, players.size() - 1).parallel()
-                    .mapToObj(j -> player(players.get(j), new ArrayList<>(data)))
+                    .mapToObj(j -> calculate(players.get(j), new ArrayList<>(data)))
                     .sorted()
                     .collect(Collectors.toList())
                     .subList(0, choosen);
@@ -37,23 +36,14 @@ public class Trainer {
             int selected = rand.nextInt(results.size());
             Net best = results.get(selected);
             Net net = best.copy();
-            net.mutate(mutationsPerNeuron);
+            net.mutate();
             players.add(net);
         }
     }
     
-    private Net player(Net copy, List<TestData> data) {
+    private Net calculate(Net copy, List<TestData> data) {
         Collections.shuffle(data);
-        float cost = 0;
-        for (TestData test : data) {
-            copy.calculate(test.in);
-            int predictedWinner = copy.result();
-            int expectedWinner = test.winnerIdx();
-            if (predictedWinner != expectedWinner) {
-                cost++;
-            }
-        }
-        copy.setCost(cost / data.size());
+        copy.cost(data);
         return copy;
     }
     

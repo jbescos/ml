@@ -11,7 +11,7 @@ public class NeuronTest {
     public void string() {
         Neuron neuron = new Neuron(new Neuron(), new Neuron());
         System.out.println(neuron.toString());
-        neuron.mutate(1);
+        neuron.mutate();
         System.out.println(neuron.toString());
     }
     
@@ -33,7 +33,7 @@ public class NeuronTest {
         out = net.calculate(1, 2);
         System.out.println(out[0].toString());
         System.out.println(out[1].toString());
-        net.mutate(2);
+        net.mutate();
         out = net.calculate(1, 2);
         System.out.println(out[0].toString());
         System.out.println(out[1].toString());
@@ -54,7 +54,7 @@ public class NeuronTest {
         net.addLayer(1);
         Net copy = net.copy();
         assertEquals(net, copy);
-        copy.mutate(2);
+        copy.mutate();
         assertNotEquals(net, copy);
     }
 }

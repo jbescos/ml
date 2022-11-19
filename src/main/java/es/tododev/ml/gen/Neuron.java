@@ -1,7 +1,9 @@
 package es.tododev.ml.gen;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
@@ -53,16 +55,17 @@ public class Neuron implements Serializable {
         return x < 0 ? 0 : 1;
     }
     
-    public void mutate(int mutations) {
-        for (int i = 0; i < mutations; i++) {
-            boolean mutateBias = r.nextBoolean();
-            if (mutateBias) {
-                bias = getRandom();
-            } else {
-                int rand = r.nextInt(inputWeights.length);
-                inputWeights[rand] = getRandom();
-            }
+    public int mutate() {
+        int idx = -1;
+        boolean mutateBias = r.nextBoolean();
+        if (mutateBias) {
+            bias = getRandom();
+        } else {
+            int rand = r.nextInt(inputWeights.length);
+            idx = rand;
+            inputWeights[rand] = getRandom();
         }
+        return idx;
     }
 
     public void setValue(float value) {

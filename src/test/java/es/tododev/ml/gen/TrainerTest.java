@@ -27,7 +27,7 @@ public class TrainerTest {
         Trainer trainer = new Trainer();
         Net best = trainer.train(players, generatePairEvenTestData(TEST_ITEMS));
         System.out.println("Best score is: " + ( 1 - best.getCost()));
-        float test = best.test(generatePairEvenTestData(100));
+        float test = 1 - best.cost(generatePairEvenTestData(100));
         System.out.println("Precission: " + test);
     }
     
@@ -43,7 +43,7 @@ public class TrainerTest {
         Trainer trainer = new Trainer();
         Net best = trainer.train(players, generateHeadTailTestData(TEST_ITEMS));
         System.out.println("Best score is: " + ( 1 - best.getCost()));
-        float test = best.test(generateHeadTailTestData(100));
+        float test = 1 - best.cost(generateHeadTailTestData(100));
         System.out.println("Precission: " + test);
     }
     

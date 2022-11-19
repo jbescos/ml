@@ -25,17 +25,17 @@ public class MnistNumbersTest {
         List<Net> players = IntStream.rangeClosed(0, LIMIT_PLAYERS).mapToObj(i -> {
             Net net = new Net();
             net.addLayer(inputs);
-            net.addLayer(16);
+            net.addLayer(20);
             net.addLayer(outputs);
             return net;
         }).collect(Collectors.toList());
         Trainer trainer = new Trainer();
         Net best = trainer.train(players, train);
         System.out.println("Best score is: " + ( 1 - best.getCost()));
-        float test = best.test(train);
+        float test = 1 - best.cost(train);
         System.out.println("Precission with trained data: " + test);
         train = fromZip("/mnist_test.zip");
-        test = best.test(train);
+        test = 1 - best.cost(train);
         System.out.println("Precission with test data: " + test);
     }
 
