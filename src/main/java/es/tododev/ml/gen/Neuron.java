@@ -23,7 +23,7 @@ public class Neuron implements Serializable {
         for (int i = 0; i < inputWeights.length; i++) {
             inputWeights[i] = getRandom();
         }
-        bias = getRandom(-1, 1);
+        bias = 0;
     }
     
     public Neuron() {

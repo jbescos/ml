@@ -65,8 +65,10 @@ public class Net implements Comparable<Net>, Serializable {
 
     public Net copy() {
         Net copy = new Net();
-        copy.mistakes = new int[mistakes.length];
-        System.arraycopy(mistakes, 0, copy.mistakes, 0, mistakes.length);
+        if (mistakes != null) {
+            copy.mistakes = new int[mistakes.length];
+            System.arraycopy(mistakes, 0, copy.mistakes, 0, mistakes.length);
+        }
         for (Neuron[] layer : layers) {
             Neuron[] previous = copy.layers.isEmpty() ? Neuron.EMPTY : copy.layers.get(copy.layers.size() - 1);
             copy.addLayer(layer.length);
