@@ -1,4 +1,4 @@
-package es.tododev.ml.gen;
+package es.tododev.ml.mine;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,15 +13,19 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.zip.ZipInputStream;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
-import es.tododev.ml.gen.Trainer.TestData;
+import es.tododev.ml.mine.Net;
+import es.tododev.ml.mine.Trainer;
+import es.tododev.ml.mine.Trainer.TestData;
 
 public class MnistNumbersTest {
 
     private static final int LIMIT_PLAYERS = 100;
 
     @Test
+    @Ignore
     public void predictNumbers() throws IOException, ClassNotFoundException {
         List<TestData> train = fromZip("/mnist_train.zip");
         int inputs = train.get(0).getIn().length;

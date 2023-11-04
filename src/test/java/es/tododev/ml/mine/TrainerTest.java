@@ -1,4 +1,4 @@
-package es.tododev.ml.gen;
+package es.tododev.ml.mine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,9 @@ import java.util.stream.IntStream;
 
 import org.junit.Test;
 
-import es.tododev.ml.gen.Trainer.TestData;
+import es.tododev.ml.mine.Net;
+import es.tododev.ml.mine.Trainer;
+import es.tododev.ml.mine.Trainer.TestData;
 
 public class TrainerTest {
 

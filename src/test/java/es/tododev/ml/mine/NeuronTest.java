@@ -1,8 +1,11 @@
-package es.tododev.ml.gen;
+package es.tododev.ml.mine;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+
+import es.tododev.ml.mine.Net;
+import es.tododev.ml.mine.Neuron;
 
 public class NeuronTest {
 

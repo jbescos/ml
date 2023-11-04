@@ -1,4 +1,4 @@
-package es.tododev.ml.gen;
+package es.tododev.ml.mine;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import es.tododev.ml.gen.Trainer.TestData;
+import es.tododev.ml.mine.Trainer.TestData;
 
 public class Net implements Comparable<Net>, Serializable {
 

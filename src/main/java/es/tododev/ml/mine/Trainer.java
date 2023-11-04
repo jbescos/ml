@@ -1,4 +1,4 @@
-package es.tododev.ml.gen;
+package es.tododev.ml.mine;
 
 import java.util.ArrayList;
 import java.util.Collections;

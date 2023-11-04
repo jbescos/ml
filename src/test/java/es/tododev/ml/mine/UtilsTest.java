@@ -1,8 +1,10 @@
-package es.tododev.ml.gen;
+package es.tododev.ml.mine;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+
+import es.tododev.ml.mine.Utils;
 
 public class UtilsTest {
 
