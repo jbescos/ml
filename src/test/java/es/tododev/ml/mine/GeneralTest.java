@@ -3,6 +3,8 @@ package es.tododev.ml.mine;
 import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,6 +30,7 @@ import org.encog.ml.data.basic.BasicMLDataSet;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
+import org.encog.persist.EncogDirectoryPersistence;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.neuroph.core.Layer;
@@ -161,8 +164,16 @@ public class GeneralTest {
 
     @Test
     public void irisEncog() throws IOException {
+        BasicNetwork network = null;
+        try (InputStream is = GeneralTest.class.getResourceAsStream("/save/iris.ecog")) {
+            if (is != null) {
+                network = (BasicNetwork) EncogDirectoryPersistence.loadObject(is);
+            }
+        }
         List<TestData> data = irisData();
         List<MLDataPair> theDate = new ArrayList<>(data.size());
+        // create training data
+        MLDataSet trainingSet = new BasicMLDataSet(theDate);
         for (TestData d :data) {
             double[] inD = new double[d.getIn().length];
             for (int j = 0; j < d.getIn().length; j++) {
@@ -179,36 +190,35 @@ public class GeneralTest {
             theDate.add(dataPair);
         }
         
-        BasicNetwork network = new BasicNetwork();
-        network.addLayer(new BasicLayer(null, true, 4));
-        network.addLayer(new BasicLayer(new ActivationReLU(), true, 5));
-        network.addLayer(new BasicLayer(new ActivationSigmoid(), false, 3));
-        network.getStructure().finalizeStructure();
-        network.reset();
-
-        // create training data
-        MLDataSet trainingSet = new BasicMLDataSet(theDate);
-
-        // train the neural network
-        final ResilientPropagation train = new ResilientPropagation(network, trainingSet);
-
-        int epoch = 1;
-
-        do {
-            train.iteration();
-            System.out.println("Epoch #" + epoch + " Error:" + train.getError());
-            epoch++;
-        } while (train.getError() > 0.01);
-        train.finishTraining();
-
+        if (network == null) {
+            network = new BasicNetwork();
+            network.addLayer(new BasicLayer(4));
+            network.addLayer(new BasicLayer(5));
+            network.addLayer(new BasicLayer(3));
+            network.getStructure().finalizeStructure();
+            network.reset();
+    
+    
+            // train the neural network
+            final ResilientPropagation train = new ResilientPropagation(network, trainingSet);
+    
+            int epoch = 1;
+    
+            do {
+                train.iteration();
+                System.out.println("Epoch #" + epoch + " Error:" + train.getError());
+                epoch++;
+            } while (train.getError() > 0.025 && epoch < 1000000);
+            train.finishTraining();
+        }
         // test the neural network
         System.out.println("Neural Network Results:");
         for (MLDataPair pair : trainingSet) {
             final MLData output = network.compute(pair.getInput());
-            System.out.println(pair.getInput().getData(0) + "," + pair.getInput().getData(1) + ", actual="
-                    + output.getData(0) + ",ideal=" + pair.getIdeal().getData(0));
+            System.out.println("Input: " + Arrays.toString(pair.getInput().getData()) + " Actual: " + Arrays.toString(output.getData()) + " Ideal: " + Arrays.toString(pair.getIdeal().getData()));
         }
 
+        EncogDirectoryPersistence.saveObject(new File("./iris.ecog"), network);
         Encog.getInstance().shutdown();
     }
 
