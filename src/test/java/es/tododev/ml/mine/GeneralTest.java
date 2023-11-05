@@ -119,11 +119,6 @@ public class GeneralTest {
     }
 
     @Test
-    public void predictNumbersDeep4j() {
-        
-    }
-
-    @Test
     public void irisNeuroph() throws IOException {
         List<TestData> train = irisData();
         int inputs = train.get(0).getIn().length;
@@ -222,6 +217,80 @@ public class GeneralTest {
         Encog.getInstance().shutdown();
     }
 
+    @Test
+    public void predictNumbersEcoj() throws IOException {
+        BasicNetwork network = null;
+        try (InputStream is = GeneralTest.class.getResourceAsStream("/save/mnist.ecog")) {
+            if (is != null) {
+                network = (BasicNetwork) EncogDirectoryPersistence.loadObject(is);
+            }
+        }
+        if (network == null) {
+            // create training data
+            MLDataSet trainingSet = dataSet(fromZip("/mnist_train.zip"));
+            
+            network = new BasicNetwork();
+            network.addLayer(new BasicLayer(trainingSet.get(0).getInput().getData().length));
+            network.addLayer(new BasicLayer(20));
+            network.addLayer(new BasicLayer(20));
+            network.addLayer(new BasicLayer(trainingSet.get(0).getIdealArray().length));
+            network.getStructure().finalizeStructure();
+            network.reset();
+    
+            // train the neural network
+            final ResilientPropagation train = new ResilientPropagation(network, trainingSet);
+    
+            int epoch = 1;
+    
+            do {
+                train.iteration(10);
+                System.out.println("Epoch #" + epoch + " Error:" + train.getError());
+                epoch++;
+            } while (train.getError() > 0.06);
+            train.finishTraining();
+        }
+        System.out.println("Neural Network Results:");
+        int successN = 0;
+        int total = 0;
+        MLDataSet trainingSet = dataSet(fromZip("/mnist_test.zip"));
+        for (MLDataPair pair : trainingSet) {
+            final MLData output = network.compute(pair.getInput());
+            int actual = getFromArray(output.getData());
+            int ideal = getFromArray(pair.getIdeal().getData());
+            if (actual == ideal) {
+                successN++;
+            }
+            total++;
+            System.out.println("Actual: " + actual + " Ideal: " + ideal);
+        }
+
+//        EncogDirectoryPersistence.saveObject(new File("./mnist.ecog"), network);
+        Encog.getInstance().shutdown();
+        System.out.println("Total: " + total + ", Success: " + successN + ", performance: " +  (double) ( (double) successN /  (double) total));
+    }
+
+    private MLDataSet dataSet(List<TestData> data) {
+        List<MLDataPair> theDate = new ArrayList<>(data.size());
+        // create training data
+        MLDataSet trainingSet = new BasicMLDataSet(theDate);
+        for (TestData d :data) {
+            double[] inD = new double[d.getIn().length];
+            for (int j = 0; j < d.getIn().length; j++) {
+                inD[j] = d.getIn()[j];
+                
+            }
+            MLData mlInput = new BasicMLData(inD);
+            double[] outD = new double[d.getOut().length];
+            for (int j = 0; j < d.getOut().length; j++) {
+                outD[j] = d.getOut()[j];
+            }
+            MLData mlOutput = new BasicMLData(outD);
+            MLDataPair dataPair = new BasicMLDataPair(mlInput, mlOutput);
+            theDate.add(dataPair);
+        }
+        return trainingSet;
+    }
+    
     private List<TestData> irisData() throws IOException {
         List<TestData> test = new ArrayList<>();
         try (InputStream in = TrainerTest.class.getResourceAsStream("/iris.csv");
@@ -249,12 +318,15 @@ public class GeneralTest {
     }
 
     private int getFromArray(double[] array) {
+        double max = 0;
+        int idxMax = 0;
         for (int i = 0; i < array.length; i++) {
-            if (array[i] == 1) {
-                return i;
+            if (array[i] > max) {
+                max = array[i];
+                idxMax = i;
             }
         }
-        return -1;
+        return idxMax;
     }
     
     private void train(NeuralNetwork ann, List<TestData> train) {
