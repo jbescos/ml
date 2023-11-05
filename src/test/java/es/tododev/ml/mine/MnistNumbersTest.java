@@ -62,6 +62,7 @@ public class MnistNumbersTest {
     }
 
     @Test
+    @Ignore
     public void predictNumbersNeuroph() throws IOException, ClassNotFoundException {
         List<TestData> train = fromZip("/mnist_train.zip");
         int inputs = train.get(0).getIn().length;
@@ -92,11 +93,27 @@ public class MnistNumbersTest {
             total++;
             if (success) {
                 successN++;
+            } else {
+                System.out.println("Expected: " + getFromArray(outD) + " but was: " + getFromArray(result));
             }
         }
         System.out.println("Total: " + total + ", Success: " + successN + ", performance: " + (successN / total));
     }
 
+    @Test
+    public void predictNumbersDeep4j() {
+        
+    }
+    
+    private int getFromArray(double[] array) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == 1) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
     private void train(NeuralNetwork ann, List<TestData> train) {
         int inputs = train.get(0).getIn().length;
         int outputs = train.get(0).getOut().length;
