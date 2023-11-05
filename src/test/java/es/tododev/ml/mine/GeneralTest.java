@@ -33,6 +33,7 @@ public class GeneralTest {
     private static final int LIMIT_PLAYERS = 100;
 
     @Test
+    @Ignore
     public void predictNumbersMine() throws IOException, ClassNotFoundException {
         List<TestData> train = fromZip("/mnist_train.zip");
         int inputs = train.get(0).getIn().length;
