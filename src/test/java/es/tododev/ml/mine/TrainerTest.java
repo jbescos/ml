@@ -57,7 +57,6 @@ public class TrainerTest {
             Net net = new Net();
             net.addLayer(4);
             net.addLayer(4);
-            net.addLayer(4);
             net.addLayer(1);
             return net;
         }).collect(Collectors.toList());
@@ -88,6 +87,7 @@ public class TrainerTest {
                 test.add(testData);
             }
         }
+        Trainer.normalize(test);
         return test;
     }
 

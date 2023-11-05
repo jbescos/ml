@@ -2,8 +2,10 @@ package es.tododev.ml.mine;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -26,12 +28,11 @@ import org.neuroph.util.ConnectionFactory;
 
 import es.tododev.ml.mine.Trainer.TestData;
 
-public class MnistNumbersTest {
+public class GeneralTest {
 
     private static final int LIMIT_PLAYERS = 100;
 
     @Test
-    @Ignore
     public void predictNumbersMine() throws IOException, ClassNotFoundException {
         List<TestData> train = fromZip("/mnist_train.zip");
         int inputs = train.get(0).getIn().length;
@@ -39,7 +40,8 @@ public class MnistNumbersTest {
         List<Net> players = IntStream.rangeClosed(0, LIMIT_PLAYERS).mapToObj(i -> {
             Net net = new Net();
             net.addLayer(inputs);
-            net.addLayer(20);
+            net.addLayer(4);
+            net.addLayer(4);
             net.addLayer(outputs);
             return net;
         }).collect(Collectors.toList());
@@ -97,14 +99,79 @@ public class MnistNumbersTest {
                 System.out.println("Expected: " + getFromArray(outD) + " but was: " + getFromArray(result));
             }
         }
-        System.out.println("Total: " + total + ", Success: " + successN + ", performance: " + (successN / total));
+        System.out.println("Total: " + total + ", Success: " + successN + ", performance: " + (double) ( (double) successN /  (double) total));
     }
 
     @Test
     public void predictNumbersDeep4j() {
         
     }
-    
+
+    @Test
+    public void irisNeuroph() throws IOException {
+        List<TestData> train = irisData();
+        int inputs = train.get(0).getIn().length;
+        int outputs = train.get(0).getOut().length;
+        NeuralNetwork ann = new NeuralNetwork();
+        addLayer(ann, inputs);
+        addLayer(ann, 4);
+        addLayer(ann, 4);
+        addLayer(ann, outputs);
+        
+        ann.setInputNeurons(ann.getLayers()[0].getNeurons());
+        ann.setOutputNeurons(ann.getLayers()[ann.getLayersCount() - 1].getNeurons());
+        train(ann, train);
+
+        int successN = 0;
+        int total = 0;
+
+        // Test data set
+//        train = TODO
+        for (TestData data : train) {
+            float[] in = data.getIn();
+            float[] out = data.getOut();
+            double[] inD = IntStream.range(0, in.length).mapToDouble(i -> in[i]).toArray();
+            double[] outD = IntStream.range(0, out.length).mapToDouble(i -> out[i]).toArray();
+            ann.setInput(inD);
+            ann.calculate();
+            double[] result = ann.getOutput();
+            boolean success = Arrays.equals(outD, result);
+            total++;
+            if (success) {
+                successN++;
+            } else {
+                System.out.println("Expected: " + Arrays.toString(outD) + " but was: " + Arrays.toString(result));
+            }
+        }
+        System.out.println("Total: " + total + ", Success: " + successN + ", performance: " +  (double) ( (double) successN /  (double) total));
+    }
+
+    private List<TestData> irisData() throws IOException {
+        List<TestData> test = new ArrayList<>();
+        try (InputStream in = TrainerTest.class.getResourceAsStream("/iris.csv");
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));) {
+            while (reader.ready()) {
+                String line = reader.readLine();
+                String[] cells = line.split(",");
+                float[] input = new float[cells.length - 1];
+                float[] output = new float[3];
+                for (int i = 0; i < cells.length; i++) {
+                    if (i == cells.length - 1) {
+                        int result = Integer.parseInt(cells[i]);
+                        output[result] = 1;
+                    } else {
+                        input[i] = Float.parseFloat(cells[i]);
+                    }
+                }
+                TestData testData = new TestData(input, output);
+                System.out.println("Adding test entry. IN" + Arrays.toString(input) + " OUT" + Arrays.toString(output));
+                test.add(testData);
+            }
+        }
+        Trainer.normalize(test);
+        return test;
+    }
+
     private int getFromArray(double[] array) {
         for (int i = 0; i < array.length; i++) {
             if (array[i] == 1) {
@@ -149,7 +216,7 @@ public class MnistNumbersTest {
     
     private List<TestData> fromZip(String resource) throws IOException {
         List<TestData> test = new ArrayList<>();
-        try (InputStream in = MnistNumbersTest.class.getResourceAsStream(resource);
+        try (InputStream in = GeneralTest.class.getResourceAsStream(resource);
                 ZipInputStream zipFile = new ZipInputStream(in)) {
             zipFile.getNextEntry();
             try (Scanner sc = new Scanner(zipFile)) {

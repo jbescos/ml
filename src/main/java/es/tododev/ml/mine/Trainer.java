@@ -1,6 +1,7 @@
 package es.tododev.ml.mine;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -80,4 +81,28 @@ public class Trainer {
         
     }
     
+    public static void normalize(List<TestData> data) {
+        Float min[] = new Float[data.get(0).in.length];
+        Float max[] = new Float[min.length];
+        for (TestData d : data) {
+            for (int i = 0; i < d.in.length; i++) {
+                if (min[i] == null) {
+                    min[i] = d.in[i];
+                } else if (d.in[i] < min[i]) {
+                    min[i] = d.in[i];
+                }
+                if (max[i] == null) {
+                    max[i] = d.in[i];
+                } else if (d.in[i] > max[i]) {
+                    max[i] = d.in[i];
+                }
+            }
+        }
+        // (X - Xmin) / (Xmax - Xmin)
+        for (TestData d : data) {
+            for (int i = 0; i < d.in.length; i++) {
+                d.in[i] = (d.in[i] - min[i]) / (max[i] - min[i]);
+            }
+        }
+    }
 }
