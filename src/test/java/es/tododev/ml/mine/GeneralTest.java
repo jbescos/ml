@@ -42,6 +42,7 @@ import org.neuroph.nnet.learning.BackPropagation;
 import org.neuroph.util.ConnectionFactory;
 
 import es.tododev.ml.mine.Trainer.TestData;
+import es.tododev.ml.util.ImageToCsv;
 
 public class GeneralTest {
 
@@ -218,7 +219,7 @@ public class GeneralTest {
     }
 
     @Test
-    public void predictNumbersEcoj() throws IOException {
+    public void predictNumbersEcog() throws IOException {
         BasicNetwork network = null;
         try (InputStream is = GeneralTest.class.getResourceAsStream("/save/mnist.ecog")) {
             if (is != null) {
@@ -250,9 +251,22 @@ public class GeneralTest {
             train.finishTraining();
         }
         System.out.println("Neural Network Results:");
+
+        MLDataSet trainingSet = dataSet(fromZip("/mnist_test.zip"));
+        verify(network, trainingSet);
+        checkImage("/number/2.png", network, 2);
+        checkImage("/number/3.png", network, 3);
+        checkImage("/number/7.png", network, 7);
+        checkImage("/number/4.png", network, 4);
+        checkImage("/number/5.png", network, 5);
+//        EncogDirectoryPersistence.saveObject(new File("./mnist.ecog"), network);
+        Encog.getInstance().shutdown();
+        
+    }
+
+    private void verify(BasicNetwork network, MLDataSet trainingSet) {
         int successN = 0;
         int total = 0;
-        MLDataSet trainingSet = dataSet(fromZip("/mnist_test.zip"));
         for (MLDataPair pair : trainingSet) {
             final MLData output = network.compute(pair.getInput());
             int actual = getFromArray(output.getData());
@@ -263,12 +277,19 @@ public class GeneralTest {
             total++;
             System.out.println("Actual: " + actual + " Ideal: " + ideal);
         }
-
-//        EncogDirectoryPersistence.saveObject(new File("./mnist.ecog"), network);
-        Encog.getInstance().shutdown();
         System.out.println("Total: " + total + ", Success: " + successN + ", performance: " +  (double) ( (double) successN /  (double) total));
     }
-
+    
+    private void checkImage(String path, BasicNetwork network, int expected) throws IOException {
+        try (InputStream is = GeneralTest.class.getResourceAsStream(path)) {
+            float[] number = ImageToCsv.imageToArray(is);
+            float[] out = new float[10];
+            out[expected] = 1;
+            TestData data = new TestData(number, out);
+            verify(network, dataSet(Arrays.asList(data)));
+        }
+    }
+    
     private MLDataSet dataSet(List<TestData> data) {
         List<MLDataPair> theDate = new ArrayList<>(data.size());
         // create training data
