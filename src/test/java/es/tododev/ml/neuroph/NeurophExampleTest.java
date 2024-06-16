@@ -18,12 +18,19 @@ public class NeurophExampleTest {
         NeuralNetwork neuralNetwork = inst();
         training(neuralNetwork);
         
-        neuralNetwork.setInput(0, 1);
-        neuralNetwork.calculate();
-        double[] networkOutputOne = neuralNetwork.getOutput();
-        assertEquals(1, (int) networkOutputOne[0]);
+        verify(neuralNetwork, 0, 1, 1);
+        verify(neuralNetwork, 1, 1, 0);
+        verify(neuralNetwork, 0, 0, 0);
+        verify(neuralNetwork, 1, 0, 1);
     }
 
+    private void verify(NeuralNetwork neuralNetwork, int in0, int in1, int expectedOutput) {
+        neuralNetwork.setInput(in0, in1);
+        neuralNetwork.calculate();
+        double[] networkOutputOne = neuralNetwork.getOutput();
+        assertEquals(expectedOutput, (int) networkOutputOne[0]);
+    }
+    
     private void training(NeuralNetwork network) {
         int inputSize = 2;
         int outputSize = 1;
